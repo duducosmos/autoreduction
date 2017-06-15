@@ -46,6 +46,8 @@ field=$5
 #Name of the folder that the pipeline will be save the reduced data
 cName=$6
 
+#Send Message when the process is finished
+mailTo=$7
 
 #Starting reduction Date
 splitDate $sDate
@@ -137,5 +139,13 @@ do
     runcoadding.py -u -o $field$un$tile $filt
 done
 wait
+
+
+if [ $mailTo != '']; then
+    export REPLYTO=jype@jype.com
+    now=$(date +"%T")
+    echo "The reducion process for $field$un$tile at $now." | \
+    mail -a From:jype@jype.com -s "Reduction for $field$un$tile finished" $mailTo
+fi
 
 echo "Reduction finished..."
