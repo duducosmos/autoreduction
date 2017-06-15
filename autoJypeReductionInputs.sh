@@ -7,11 +7,11 @@ if [ $1 == '-h' ]; then
     echo ""
     echo ""
     echo "The input seq. is:"
-    echo "star date yyyy-mm-dd, end date yyyy-mm-dd, inst. conf, tile, filed, red. folder name"
+    echo "star date yyyy-mm-dd, end date yyyy-mm-dd, inst. conf, tile, filed, red. folder name, e-mail of user"
     echo ""
     echo ""
     echo "ex:"
-    echo "autoJypeReductionInputs.sh 2016-09-08 2016-09-11 instr-t80cam.txt 0021 STRIPE82 STRIPE82_0058"
+    echo "autoJypeReductionInputs.sh 2016-09-08 2016-09-11 instr-t80cam.txt 0021 STRIPE82 STRIPE82_0058 pereira.somoza@gmail.com"
     echo ""
     exit
 fi
