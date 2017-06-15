@@ -1,0 +1,6 @@
+camera: T80Cam
+telescope: T80
+ccdpos: "0"      #ccd position
+ccdname: "e2v CCD290-99"
+filtername: F378
+
