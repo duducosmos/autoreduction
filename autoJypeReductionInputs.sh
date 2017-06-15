@@ -144,8 +144,8 @@ wait
 if [ $mailTo != '']; then
     export REPLYTO=jype@jype.com
     now=$(date +"%T")
-    echo "The reducion process for $field$un$tile at $now." | \
-    mail -a From:jype@jype.com -s "Reduction for $field$un$tile finished" $mailTo
+    echo "The reducion process for $field$un$tile was finished at $now." | \
+    mail -a From:jype@jype.com -s "noReply:Reduction for $field$un$tile finished" $mailTo
 fi
 
 echo "Reduction finished..."
