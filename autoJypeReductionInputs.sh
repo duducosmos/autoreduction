@@ -48,14 +48,14 @@ cName=$6
 
 
 #Starting reduction Date
-splitDate sDate
+splitDate $sDate
 yyyy0=$yyyy
 mm0=$mm
 dd0=$dd
 
 
 #End reduction Date.
-splitDate eDate
+splitDate $eDate
 yyyy1=$yyyy
 mm1=$mm
 dd1=$dd
