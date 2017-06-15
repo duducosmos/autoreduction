@@ -16,8 +16,6 @@ if [ $1 == '-h' ]; then
     exit
 fi
 
-
-
 yyyy=''
 mm=''
 dd=''
@@ -41,14 +39,13 @@ eDate=$2
 #Name of file with instrument info.
 inst=$3
 
+
 tile=$4
 field=$5
 
 #Name of the folder that the pipeline will be save the reduced data
 cName=$6
 
-#Number of parallel process to reduce individual images
-nprR=3
 
 #Starting reduction Date
 splitDate sDate
@@ -56,11 +53,16 @@ yyyy0=$yyyy
 mm0=$mm
 dd0=$dd
 
+
 #End reduction Date.
 splitDate eDate
 yyyy1=$yyyy
 mm1=$mm
 dd1=$dd
+
+#Number of parallel process to reduce individual images
+nprR=3
+
 
 ei=e
 un=_
@@ -75,8 +77,7 @@ function parallelMasterFlat(){
           echo ''
           echo ''
           echo ''
-          echo "Starting the creationg of master sky-flat  "
-          echo "for filter $filt."
+          echo "Starting the creation of master sky-flat for filter $filt."
           echo ''
           echo ''
           runcf.py  -s $sDate -e $eDate  -t 16 --instconfig $inst -f $filt &
@@ -87,9 +88,6 @@ function parallelMasterFlat(){
     wait
 
 }
-
-
-filters=(R I G F660 U z F378 F395 F410 F861 F515 F430)
 
 echo ""
 echo "Invalidating all previous master frame."
@@ -104,14 +102,15 @@ validateCF.py j02-BIAS-b$yyyy0$mm0$dd0$ei$mm1$dd1-00-$cName $vcf
 echo ""
 echo "Creating the Master Sky-Flat, and, performing the reduction"
 echo "of individual images for the field $field$un$tile."
-echo ""
 
+echo ""
 
 parallelMasterFlat R I G
 parallelMasterFlat F660 U z
 parallelMasterFlat F378 F395 F410
 parallelMasterFlat F861 F515 F430
 
+filters=(R I G F660 U z F378 F395 F410 F861 F515 F430)
 
 for filt in "${filters[@]}";
 do
@@ -123,7 +122,6 @@ do
     echo ''
     echo ''
 done
-
 
 echo ''
 echo ''
