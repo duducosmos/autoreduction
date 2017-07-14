@@ -47,6 +47,7 @@ class ReductionBot:
         self.biasList = []
         self.flatList = []
         self.observationList = {"mainSurvey": [], "ultraShort": []}
+        self.tiles = []
 
         self.existDataFolder = False
 
@@ -55,6 +56,8 @@ class ReductionBot:
         self.workDir = workDir
 
         self.outTileInfo = ""
+
+
 
         if(workDir[-1] == "/"):
             self.workDir += "reductionBotWDir/"
@@ -124,7 +127,7 @@ class ReductionBot:
 # 5 PIXEL_SCALE
 # 6 IMAGE_SIZE
 '''
-        tiles = {}
+
         tileEndName = datetime.now().strftime("%Y%m%d")
 
         for img in surveyData:
@@ -153,13 +156,15 @@ class ReductionBot:
             else:
                 if("OBJECT" in hd.keys()):
                     self.observationList['mainSurvey'].append(img)
-                    if(hd["OBJECT"] not in tiles.keys()
+                    tileName = "{0}_{1}".format(hd['OBJECT'].replace(" ", "_"),
+                                                tileEndName)
+                    if(tileNamenot in self.tiles
                        ):
 
-                        tiles[hd['OBJECT']] = [hd['CRVAL1'], hd['CRVAL2']]
-                        baseInfo += "{0}_{1} {2} {3} 1 0.550 11000 \n".format(
-                            hd['OBJECT'].replace(" ", "_"),
-                            tileEndName,
+                        self.tiles.append(tileName)
+
+                        baseInfo += "{0} {1} {2} 1 0.550 11000 \n".format(
+                            tileName,
                             hd['CRVAL1'],
                             hd['CRVAL2'])
 
@@ -254,7 +259,7 @@ class ReductionBot:
         except:
             self.logger.error("An Error occurred during the updatehead",
                               extra=self._extra)
-            return
+            return False
 
         self.logger.info("Step 2: Classifing images.", extra=self._extra)
 
@@ -269,7 +274,7 @@ class ReductionBot:
         except:
             self.logger.error("An Error occurred during the Image Classify",
                               extra=self._extra)
-            return
+            return False
 
         self.logger.info("Step 3: Inserting into DB.", extra=self._extra)
 
@@ -284,7 +289,7 @@ class ReductionBot:
         except:
             self.logger.error("An Error occurred during the db insert",
                               extra=self._extra)
-            return
+            return False
 
         self.logger.info(
             "Step 4: Inserting Tile Info into DB.", extra=self._extra)
@@ -296,7 +301,9 @@ class ReductionBot:
         except:
             self.logger.error("An Error occurred inseting tiles info",
                               extra=self._extra)
-            return
+            return False
+
+        return True
 
     def __startReduction(self):
         self.logger.info("Starting the reduction process", extra=self._extra)
@@ -305,9 +312,10 @@ class ReductionBot:
         folder = self.searchForNewData()
         if(folder is not None):
             surveyDataFound = self.__selectDataByType(folder + "/")
-            if(surveyDataFound):
-                self.__addDataToDB()
-                self.__startReduction()
+            if(surveyDataFound is True):
+                dataInserted = self.__addDataToDB()
+                if(dataInserted is True)
+                    self.__startReduction()
 
     def rescheduler(self):
         self.logger.info("Starting Scheduler", extra=self._extra)
@@ -325,6 +333,7 @@ class ReductionBot:
         self.biasList = []
         self.flatList = []
         self.observationList = {"mainSurvey": [], "ultraShort": []}
+        self.tiles = []
 
         self.__scheduler.enterabs(time.mktime(self.__nextReduction.timetuple()),
                                   priority=0,
