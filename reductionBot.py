@@ -238,7 +238,12 @@ class ReductionBot:
         self.logger.info("Appling the command: {}".format(upHead),
                          extra=self._extra)
 
-        check_call(upHead, shell=True)
+        try:
+            check_call(upHead, shell=True)
+        except:
+            self.logger.error("An Error occurred during the updatehead",
+                             extra=self._extra)
+
 
         self.logger.info("Step 2: Classifing images.", extra=self._extra)
 
@@ -248,7 +253,11 @@ class ReductionBot:
         self.logger.info("Appling the command: {}".format(imgClass),
                          extra=self._extra)
 
-        check_call(imgClass, shell=True)
+        try:
+            check_call(imgClass, shell=True)
+        except:
+            self.logger.error("An Error occurred during the Image Classify",
+                             extra=self._extra)
 
         self.logger.info("Step 3: Inserting into DB.", extra=self._extra)
 
@@ -258,14 +267,22 @@ class ReductionBot:
         self.logger.info("Appling the command: {}".format(inDb),
                          extra=self._extra)
 
-        check_call(inDb, shell=True)
+        try:
+            check_call(inDb, shell=True)
+        except:
+            self.logger.error("An Error occurred during the db insert",
+                             extra=self._extra)
 
         self.logger.info(
             "Step 4: Inserting Tile Info into DB.", extra=self._extra)
 
-        check_call("inserttiles.py {0} >> {1}".format(self.workDir + self.outTileInfo,
+        try:
+            check_call("inserttiles.py {0} >> {1}".format(self.workDir + self.outTileInfo,
                                                       self.insertDBLogFile),
                    shell=True)
+        except:
+            self.logger.error("An Error occurred inseting tiles info",
+                             extra=self._extra)
 
     def __startReduction(self):
         self.logger.info("Starting the reduction process", extra=self._extra)
