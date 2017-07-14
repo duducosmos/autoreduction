@@ -187,9 +187,11 @@ class ReductionBot:
         if(len(self.flatList) == 0):
             self.logger.warning("No Flat Found", extra=self._extra)
 
-        if(len(self.surveyData) == 0):
+        if(len(surveyData) == 0):
             self.logger.warning("No Survey Data Found", extra=self._extra)
             return False
+
+        self.__separeteObsData(surveyData)
 
         self.dataListFile = "reduction_list_{}.txt".format(
             datetime.now().strftime("%Y%m%dT%H:%M:%S")
