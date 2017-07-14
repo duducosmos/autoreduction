@@ -127,8 +127,15 @@ class ReductionBot:
         tileEndName = datetime.now().strftime("%Y%m%d")
 
         for img in surveyData:
+            imgExtension = img.split(".")[-1].replace("\n", "")
             hdu = fits.open(img.replace('\n', ''))
-            hd = hdu[0].header
+            if(imgExtension == "fz"):
+                hd = hdu[1].header
+            else:
+                hd = hdu[0].header
+
+
+
             if(hd['HIERARCH T80S DET EXPTIME'] <= 5.0):
                 self.observationList['ultraShort'].append()
             else:
