@@ -136,7 +136,6 @@ class ReductionBot:
             else:
                 hd = hdu[0].header
 
-
             if(hd['HIERARCH T80S DET EXPTIME'] <= 5.0):
                 self.observationList['ultraShort'].append(img)
             else:
@@ -166,7 +165,7 @@ class ReductionBot:
         self.outTileInfo = "tilesInfo_" + tileEndName + ".txt"
 
         self.logger.info(
-            "Creating Tile Info File:  {}".format(self.workDir + outTileInfo),
+            "Creating Tile Info File:  {}".format(self.workDir + self.outTileInfo),
             extra=self._extra
         )
 
@@ -231,8 +230,8 @@ class ReductionBot:
         self.logger.info("Step 1: Updating Header.", extra=self._extra)
 
         upHead = "{0} updatehead.py -i {1} -o ARG &> {2}".format(commonCommand,
-                                                           self.t80cam,
-                                                           self.insertDBLogFile)
+                                                                 self.t80cam,
+                                                                 self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(upHead),
                          extra=self._extra)
@@ -242,7 +241,7 @@ class ReductionBot:
         self.logger.info("Step 2: Classifing images.", extra=self._extra)
 
         imgClass = "{0} imgclassify.py -o ARG &> {1}".format(commonCommand,
-                                                      self.insertDBLogFile)
+                                                             self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(imgClass),
                          extra=self._extra)
@@ -268,16 +267,16 @@ class ReductionBot:
         self.logger.info("Starting the reduction process", extra=self._extra)
 
     def steps(self):
-        folder=self.searchForNewData()
+        folder = self.searchForNewData()
         if(folder is not None):
-            surveyDataFound=self.__selectDataByType(folder + "/")
+            surveyDataFound = self.__selectDataByType(folder + "/")
             if(surveyDataFound):
                 self.__addDataToDB()
                 self.__startReduction()
 
     def rescheduler(self):
         self.logger.info("Starting Scheduler", extra=self._extra)
-        self.__nextReduction=datetime.now()
+        self.__nextReduction = datetime.now()
         self.__nextReduction += timedelta(hours=self.__deltaTimeHours)
 
         self.steps()
@@ -288,9 +287,9 @@ class ReductionBot:
             extra=self._extra
         )
 
-        self.biasList=[]
-        self.flatList=[]
-        self.observationList={"mainSurvey": [], "ultraShort": []}
+        self.biasList = []
+        self.flatList = []
+        self.observationList = {"mainSurvey": [], "ultraShort": []}
 
         self.__scheduler.enterabs(time.mktime(self.__nextReduction.timetuple()),
                                   priority=0,
@@ -306,7 +305,7 @@ class ReductionBot:
 
 if(__name__ == "__main__"):
 
-    bot=ReductionBot(user="jype",
+    bot = ReductionBot(user="jype",
                        useremail="pereira.somoza@gmail.com",
                        deltaTimeHours=1.0 / (60 * 8))
     bot.startBot()
