@@ -167,7 +167,8 @@ class ReductionBot:
         self.outTileInfo = "tilesInfo_" + tileEndName + ".txt"
 
         self.logger.info(
-            "Creating Tile Info File:  {}".format(self.workDir + self.outTileInfo),
+            "Creating Tile Info File:  {}".format(
+                self.workDir + self.outTileInfo),
             extra=self._extra
         )
 
@@ -231,9 +232,9 @@ class ReductionBot:
 
         self.logger.info("Step 1: Updating Header.", extra=self._extra)
 
-        upHead = "{0} updatehead.py -i {1} -o ARG >> {2}".format(commonCommand,
+        upHead = "{0} bash -c 'updatehead.py -i {1} -o \"$1\" >> {2}' fnord ARG".format(commonCommand,
                                                                  self.t80cam,
-                                                                 self.insertDBLogFile)
+                                                                 self.workDir + self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(upHead),
                          extra=self._extra)
@@ -242,13 +243,13 @@ class ReductionBot:
             check_call(upHead, shell=True)
         except:
             self.logger.error("An Error occurred during the updatehead",
-                             extra=self._extra)
-
+                              extra=self._extra)
+            return
 
         self.logger.info("Step 2: Classifing images.", extra=self._extra)
 
-        imgClass = "{0} imgclassify.py -o ARG >> {1}".format(commonCommand,
-                                                             self.insertDBLogFile)
+        imgClass = "{0} bash -c 'imgclassify.py -o \"$1\" >> {1}' fnord ARG ".format(commonCommand,
+                                                             self.workDir + self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(imgClass),
                          extra=self._extra)
@@ -257,12 +258,13 @@ class ReductionBot:
             check_call(imgClass, shell=True)
         except:
             self.logger.error("An Error occurred during the Image Classify",
-                             extra=self._extra)
+                              extra=self._extra)
+            return
 
         self.logger.info("Step 3: Inserting into DB.", extra=self._extra)
 
-        inDb = "{0}  insertdb.py -o ARG >> {1}".format(commonCommand,
-                                                       self.insertDBLogFile)
+        inDb = "{0} bash -c 'insertdb.py -o \"$1\" >> {1}' fnord ARG".format(commonCommand,
+                                                       self.workDir + self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(inDb),
                          extra=self._extra)
@@ -271,18 +273,20 @@ class ReductionBot:
             check_call(inDb, shell=True)
         except:
             self.logger.error("An Error occurred during the db insert",
-                             extra=self._extra)
+                              extra=self._extra)
+            return
 
         self.logger.info(
             "Step 4: Inserting Tile Info into DB.", extra=self._extra)
 
         try:
             check_call("inserttiles.py {0} >> {1}".format(self.workDir + self.outTileInfo,
-                                                      self.insertDBLogFile),
-                   shell=True)
+                                                          self.workDir + self.insertDBLogFile),
+                       shell=True)
         except:
             self.logger.error("An Error occurred inseting tiles info",
-                             extra=self._extra)
+                              extra=self._extra)
+            return
 
     def __startReduction(self):
         self.logger.info("Starting the reduction process", extra=self._extra)
