@@ -24,12 +24,14 @@ import glob
 
 class ReductionBot:
 
-    def __init__(self, user, useremail,
+    def __init__(self, user, useremail, outReducFolder,
                  clientIP="0.0.0.0",
                  searchFolder="/mnt/images",
                  deltaTimeHours=24,
                  workDir="./",
-                 t80cam="./t80cam.yaml"
+                 t80cam="./t80cam.yaml",
+                 instConfig="./instr-t80cam.txt",
+                 deltaDaysFlatBias=10
                  ):
 
         self.__scheduler = sched.scheduler(timefunc=time.time,
@@ -55,9 +57,12 @@ class ReductionBot:
 
         self.workDir = workDir
 
+        self.instConfig = instConfig
+        self.outReducFolder = outReducFolder
+
+        self.deltaDaysFlatBias = deltaDaysFlatBias
+
         self.outTileInfo = ""
-
-
 
         if(workDir[-1] == "/"):
             self.workDir += "reductionBotWDir/"
@@ -113,8 +118,6 @@ class ReductionBot:
             self.logger.error("No data folder for the current day: {}".format(folder),
                               extra=self._extra)
             return None
-
-
 
     def __separeteObsData(self, surveyData):
 
@@ -299,7 +302,7 @@ class ReductionBot:
                                                           self.workDir + self.insertDBLogFile),
                        shell=True)
         except:
-            self.logger.error("An Error occurred inseting tiles info",
+            self.logger.error("An Error occurred inserting tiles info",
                               extra=self._extra)
             return False
 
@@ -307,6 +310,31 @@ class ReductionBot:
 
     def __startReduction(self):
         self.logger.info("Starting the reduction process", extra=self._extra)
+        endReduction = datetime.now().strftime("%Y-%m-%d")
+        startReduction = datetime.now()
+        startReduction -= timedelta(hours=self.deltaDaysFlatBias * 24)
+        startReduction = startReduction.strftime("%Y-%m-%d")
+
+        for tile in self.tiles:
+            command = "autoJypeReductionTile.sh {0} {1} {2} {3} {4} {5}".format(
+                startReduction,
+                endReduction,
+                instConfig,
+                tile,
+                self.outReducFolder,
+                self.useremail
+            )
+            try:
+                check_call(command,
+                           shell=True)
+                self.logger.info(
+                    "Reducion for Tile {0} end.".format(tile),
+                    extra=self._extra)
+            except:
+                self.logger.error(
+                    "An Error occurred for the reducion of Tile: {0}".format(
+                        tile),
+                    extra=self._extra)
 
     def steps(self):
         folder = self.searchForNewData()
@@ -351,5 +379,7 @@ if(__name__ == "__main__"):
 
     bot = ReductionBot(user="jype",
                        useremail="pereira.somoza@gmail.com",
-                       deltaTimeHours=24)
+                       outReducFolder='/mnt/public/jype/MainSurvey',
+                       deltaTimeHours=24,
+                       deltaDaysFlatBias=10)
     bot.startBot()
