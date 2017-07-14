@@ -158,7 +158,7 @@ class ReductionBot:
                     self.observationList['mainSurvey'].append(img)
                     tileName = "{0}_{1}".format(hd['OBJECT'].replace(" ", "_"),
                                                 tileEndName)
-                    if(tileNamenot in self.tiles
+                    if(tileName not in self.tiles
                        ):
 
                         self.tiles.append(tileName)
