@@ -262,7 +262,7 @@ class ReductionBot:
     def steps(self):
         folder=self.searchForNewData()
         if(folder is not None):
-            surveyDataFound=self.__selectDataByType(folder)
+            surveyDataFound=self.__selectDataByType(folder + "/")
             if(surveyDataFound):
                 self.__addDataToDB()
                 self.__startReduction()
