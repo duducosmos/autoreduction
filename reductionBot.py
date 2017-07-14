@@ -310,5 +310,5 @@ if(__name__ == "__main__"):
 
     bot = ReductionBot(user="jype",
                        useremail="pereira.somoza@gmail.com",
-                       deltaTimeHours=1.0 / (60 * 8))
+                       deltaTimeHours=24)
     bot.startBot()
