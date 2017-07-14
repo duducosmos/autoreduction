@@ -231,7 +231,7 @@ class ReductionBot:
 
         self.logger.info("Step 1: Updating Header.", extra=self._extra)
 
-        upHead = "{0} updatehead.py -i {1} -o ARG &> {2}".format(commonCommand,
+        upHead = "{0} updatehead.py -i {1} -o ARG >> {2}".format(commonCommand,
                                                                  self.t80cam,
                                                                  self.insertDBLogFile)
 
@@ -242,7 +242,7 @@ class ReductionBot:
 
         self.logger.info("Step 2: Classifing images.", extra=self._extra)
 
-        imgClass = "{0} imgclassify.py -o ARG &> {1}".format(commonCommand,
+        imgClass = "{0} imgclassify.py -o ARG >> {1}".format(commonCommand,
                                                              self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(imgClass),
@@ -252,7 +252,7 @@ class ReductionBot:
 
         self.logger.info("Step 3: Inserting into DB.", extra=self._extra)
 
-        inDb = "{0}  insertdb.py -o ARG &> {1}".format(commonCommand,
+        inDb = "{0}  insertdb.py -o ARG >> {1}".format(commonCommand,
                                                        self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(inDb),
@@ -263,7 +263,8 @@ class ReductionBot:
         self.logger.info(
             "Step 4: Inserting Tile Info into DB.", extra=self._extra)
 
-        check_call("inserttiles.py {}".format(self.workDir + self.outTileInfo),
+        check_call("inserttiles.py {0} >> {1}".format(self.workDir + self.outTileInfo,
+                                                      self.insertDBLogFile),
                    shell=True)
 
     def __startReduction(self):
