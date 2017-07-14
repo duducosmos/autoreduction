@@ -252,7 +252,7 @@ class ReductionBot:
         self.logger.info(
             "Step 4: Inserting Tile Info into DB.", extra=self._extra)
 
-        os.system("inserttiles.py {}".format(self.workDir + self.outTileInfo)
+        os.system("inserttiles.py {}".format(self.workDir + self.outTileInfo))
 
     def __startReduction(self):
         self.logger.info("Starting the reduction process", extra=self._extra)
