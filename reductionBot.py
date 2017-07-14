@@ -43,7 +43,6 @@ class ReductionBot:
 
         # Number of parallel linux process to insert image into Data Base
         self.nWorkers = 10
-        self.dataListFile = ''
 
         self.biasList = []
         self.flatList = []
@@ -86,9 +85,7 @@ class ReductionBot:
 
         self.logger.info("The Reduction Bot is Starting", extra=self._extra)
 
-        self.dataListFile = "reduction_list_{}.txt".format(datetime.now().strftime(
-            "%Y%m%dT%H:%M:%S")
-        )
+        self.dataListFile = None
 
     def getNextReduction(self):
         return copy.copy(self.__nextReduction)
@@ -204,11 +201,11 @@ class ReductionBot:
 
         self.__separeteObsData(surveyData)
 
-        self.dataListFile = "reduction_list_{}.txt".format(
+        self.dataListFile = self.workDir + "reduction_list_{}.txt".format(
             datetime.now().strftime("%Y%m%dT%H:%M:%S")
         )
 
-        with open(self.workDir + self.dataListFile, "w") as fOut:
+        with open(self.dataListFile, "w") as fOut:
             for iData in self.observationList['mainSurvey']:
                 fOut.write("{}\n".format(iData))
 
