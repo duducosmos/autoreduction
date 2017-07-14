@@ -148,8 +148,9 @@ class ReductionBot:
                        ):
 
                         tiles[hd['OBJECT']] = [hd['CRVAL1'], hd['CRVAL2']]
-                        baseInfo += "{0} {1} {2} 1 0.550 11000 \n".format(
+                        baseInfo += "{0}_{1} {2} {3} 1 0.550 11000 \n".format(
                             hd['OBJECT'],
+                            tileEndName,
                             hd['CRVAL1'],
                             hd['CRVAL2'])
 
@@ -207,7 +208,7 @@ class ReductionBot:
             datetime.now().strftime("%Y%m%dT%H:%M:%S")
         )
 
-        with open(self.dataListFile, "w") as fOut:
+        with open(self.workDir + self.dataListFile, "w") as fOut:
             for iData in self.observationList['mainSurvey']:
                 fOut.write("{}\n".format(iData))
 
