@@ -94,10 +94,12 @@ class ReductionBot:
     def searchForNewData(self):
         folder = self._searchFolder
 
+        searchFor = datetime.now() - timedelta(hours=24)
+
         if(folder[-1] == "/"):
-            folder += datetime.now().strftime("%Y%m%d")
+            folder += searchFor.strftime("%Y%m%d")
         else:
-            folder += "/" + datetime.now().strftime("%Y%m%d")
+            folder += "/" + searchFor.strftime("%Y%m%d")
 
         self.existDataFolder = os.path.isdir(folder)
 
