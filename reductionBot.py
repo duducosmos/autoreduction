@@ -314,7 +314,7 @@ class ReductionBot:
             surveyDataFound = self.__selectDataByType(folder + "/")
             if(surveyDataFound is True):
                 dataInserted = self.__addDataToDB()
-                if(dataInserted is True)
+                if(dataInserted is True):
                     self.__startReduction()
 
     def rescheduler(self):
