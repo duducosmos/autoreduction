@@ -140,13 +140,13 @@ class ReductionBot:
             else:
                 if("OBJECT" in hd.keys()):
                     self.observationList['mainSurvey'].append(img)
-                    if(hd["OBJECT"].replace(" ", "_") + tileEndName
+                    if(hd["OBJECT"].replace(" ", "_") + "_" + tileEndName
                        not in tiles.keys()
                        ):
 
                         tiles[hd['OBJECT']] = [hd['CRVAL1'], hd['CRVAL2']]
                         baseInfo += "{0}_{1} {2} {3} 1 0.550 11000 \n".format(
-                            hd['OBJECT'],
+                            hd['OBJECT'].replace(" ", "_"),
                             tileEndName,
                             hd['CRVAL1'],
                             hd['CRVAL2'])
