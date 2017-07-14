@@ -111,6 +111,8 @@ class ReductionBot:
                               extra=self._extra)
             return None
 
+
+
     def __separeteObsData(self, surveyData):
 
         self.logger.info("Separating in ultraShort and mainSurvey",
@@ -128,12 +130,23 @@ class ReductionBot:
         for img in surveyData:
             imgExtension = img.split(".")[-1].replace("\n", "")
             hdu = fits.open(img.replace('\n', ''))
+
+            try:
+                hd = hdu[0].header
+                hd['HIERARCH T80S DET EXPTIME']
+            except:
+                hd = hdu[1].header
+                self.logger.warning("Image with header inverted: {}".format(img),
+                                    extra=self._extra)
+            '''
+
             if(imgExtension == "fz"):
                 hd = hdu[1].header
                 self.logger.warning("Image with header inverted: {}".format(img),
                                     extra=self._extra)
             else:
                 hd = hdu[0].header
+            '''
 
             if(hd['HIERARCH T80S DET EXPTIME'] <= 5.0):
                 self.observationList['ultraShort'].append(img)
@@ -230,8 +243,8 @@ class ReductionBot:
         self.logger.info("Step 1: Updating Header.", extra=self._extra)
 
         upHead = "{0} bash -c 'updatehead.py -i {1} -o \"$1\" >> {2}' fnord ARG".format(commonCommand,
-                                                                 self.t80cam,
-                                                                 self.workDir + self.insertDBLogFile)
+                                                                                        self.t80cam,
+                                                                                        self.workDir + self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(upHead),
                          extra=self._extra)
@@ -246,7 +259,7 @@ class ReductionBot:
         self.logger.info("Step 2: Classifing images.", extra=self._extra)
 
         imgClass = "{0} bash -c 'imgclassify.py -o \"$1\" >> {1}' fnord ARG ".format(commonCommand,
-                                                             self.workDir + self.insertDBLogFile)
+                                                                                     self.workDir + self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(imgClass),
                          extra=self._extra)
@@ -261,7 +274,7 @@ class ReductionBot:
         self.logger.info("Step 3: Inserting into DB.", extra=self._extra)
 
         inDb = "{0} bash -c 'insertdb.py -o \"$1\" >> {1}' fnord ARG".format(commonCommand,
-                                                       self.workDir + self.insertDBLogFile)
+                                                                             self.workDir + self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(inDb),
                          extra=self._extra)
