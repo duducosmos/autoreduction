@@ -214,7 +214,7 @@ class ReductionBot:
         self.__separeteObsData(surveyData)
 
         self.dataListFile = self.workDir + "reduction_list_{}.txt".format(
-            datetime.now().strftime("%Y%m%dT%H:%M:%S")
+            datetime.now().strftime("%Y%m%d")
         )
 
         with open(self.dataListFile, "w") as fOut:
