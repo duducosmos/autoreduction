@@ -41,7 +41,8 @@ class ReductionBot:
         self.t80cam = t80cam
 
         # Number of parallel linux process to insert image into Data Base
-        self.dataListFile = 10
+        self.nWorkers = 10
+        self.dataListFile = ''
 
         self.biasList = []
         self.flatList = []
