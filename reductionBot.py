@@ -131,16 +131,17 @@ class ReductionBot:
             hdu = fits.open(img.replace('\n', ''))
             if(imgExtension == "fz"):
                 hd = hdu[1].header
+                self.logger.warning("Image with header inverted: {}".format(img),
+                                    extra=self._extra)
             else:
                 hd = hdu[0].header
 
 
-
             if(hd['HIERARCH T80S DET EXPTIME'] <= 5.0):
-                self.observationList['ultraShort'].append()
+                self.observationList['ultraShort'].append(img)
             else:
                 if("OBJECT" in hd.keys()):
-                    self.observationList['mainSurvey'].append()
+                    self.observationList['mainSurvey'].append(img)
                     if(hd["OBJECT"].replace(" ", "_") + tileEndName
                        not in tiles.keys()
                        ):
