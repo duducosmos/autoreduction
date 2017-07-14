@@ -73,7 +73,7 @@ vcf=0
 function parallelMasterFlat(){
     # Warning: The pipelie has a large space complexity,
     # max recomeded three filters.
-    local filters=($1 $2 $3)
+    local filters=($1 $2 $3 $4)
     for filt in "${filters[@]}";
     do
           echo ''
@@ -107,10 +107,9 @@ echo "of individual images for the field $field$un$tile."
 
 echo ""
 
-parallelMasterFlat R I G
-parallelMasterFlat F660 U z
-parallelMasterFlat F378 F395 F410
-parallelMasterFlat F861 F515 F430
+parallelMasterFlat R I G F660
+parallelMasterFlat U z F378 F395
+parallelMasterFlat F410 F861 F515 F430
 
 filters=(R I G F660 U z F378 F395 F410 F861 F515 F430)
 
@@ -141,7 +140,7 @@ done
 wait
 
 
-if [ $mailTo != '']; then
+if [ $mailTo != '' ]; then
     export REPLYTO=jype@jype.com
     now=$(date +"%T")
     echo "The reducion process for $field$un$tile was finished at $now." | \
