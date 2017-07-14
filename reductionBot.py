@@ -15,6 +15,7 @@ import time
 from datetime import datetime, timedelta
 import sched
 import os
+from subprocess import check_call
 import copy
 import logging
 from astropy.io import fits
@@ -237,7 +238,7 @@ class ReductionBot:
         self.logger.info("Appling the command: {}".format(upHead),
                          extra=self._extra)
 
-        os.system(upHead)
+        check_call(upHead, shell=True)
 
         self.logger.info("Step 2: Classifing images.", extra=self._extra)
 
@@ -247,7 +248,7 @@ class ReductionBot:
         self.logger.info("Appling the command: {}".format(imgClass),
                          extra=self._extra)
 
-        os.system(imgClass)
+        check_call(imgClass, shell=True)
 
         self.logger.info("Step 3: Inserting into DB.", extra=self._extra)
 
@@ -257,12 +258,13 @@ class ReductionBot:
         self.logger.info("Appling the command: {}".format(inDb),
                          extra=self._extra)
 
-        os.system(inDb)
+        check_call(inDb, shell=True)
 
         self.logger.info(
             "Step 4: Inserting Tile Info into DB.", extra=self._extra)
 
-        os.system("inserttiles.py {}".format(self.workDir + self.outTileInfo))
+        check_call("inserttiles.py {}".format(self.workDir + self.outTileInfo),
+                   shell=True)
 
     def __startReduction(self):
         self.logger.info("Starting the reduction process", extra=self._extra)
