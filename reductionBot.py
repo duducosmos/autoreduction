@@ -385,27 +385,27 @@ if(__name__ == "__main__"):
         description=description)
 
     parser.add_argument( "-u",
-                        help="User Name"
+                        help="User Name",
                         type=str,
                         default="jype")
 
     parser.add_argument( "-e",
-                        help="User email"
+                        help="User email",
                         type=str,
                         default="pereira.somoza@gmail.com")
 
     parser.add_argument( "-f",
-                        help="Folder where data are reduced"
+                        help="Folder where data are reduced",
                         type=str,
                         default="/mnt/public/jype/MainSurvey")
 
     parser.add_argument( "-t",
-                        help="Time interval, in hours, for the next reduction"
+                        help="Time interval, in hours, for the next reduction",
                         type=int,
                         default=24)
 
     parser.add_argument( "-d",
-                        help="Time interval, in days, to search for Flat and Bias"
+                        help="Time interval, in days, to search for Flat and Bias",
                         type=int,
                         default=10)
 
