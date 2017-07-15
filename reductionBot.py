@@ -20,13 +20,15 @@ import copy
 import logging
 from astropy.io import fits
 import glob
+from config import JYPE_VERSION, RAW_PATH_PATTERN,
+from config import FILTERS, MIN_COMBINE_NUMBER_FLAT, MIN_COMBINE_NUMBER_BIAS
+from searchImages import searchImages
 
 
 class ReductionBot:
 
-    def __init__(self, user, useremail, outReducFolder,
+    def __init__(self, user, useremail,
                  clientIP="0.0.0.0",
-                 searchFolder="/mnt/images",
                  deltaTimeHours=24,
                  workDir="./",
                  t80cam="./t80cam.yaml",
@@ -39,7 +41,9 @@ class ReductionBot:
         self.__nextReduction = datetime.now()
         self.__deltaTimeHours = deltaTimeHours
         self._extra = {'clientip': clientIP, 'user': user}
-        self._searchFolder = searchFolder
+
+        self._searchFolder = RAW_PATH_PATTERN
+        self.outReducFolder = JYPE_JYPE_VERSION
 
         self.t80cam = t80cam
 
@@ -58,7 +62,6 @@ class ReductionBot:
         self.workDir = workDir
 
         self.instConfig = instConfig
-        self.outReducFolder = outReducFolder
 
         self.deltaDaysFlatBias = deltaDaysFlatBias
 
@@ -111,12 +114,14 @@ class ReductionBot:
         self.existDataFolder = os.path.isdir(folder)
 
         if(self.existDataFolder):
-            self.logger.info("Selected folder for the current day: {}".format(folder),
-                             extra=self._extra)
+            self.logger.info("Selected folder for the current day: {}".format(
+                folder),
+                extra=self._extra)
             return folder
         else:
-            self.logger.error("No data folder for the current day: {}".format(folder),
-                              extra=self._extra)
+            self.logger.error("No data folder for the current day: {}".format(
+                folder),
+                extra=self._extra)
             return None
 
     def __separeteObsData(self, surveyData):
@@ -137,46 +142,41 @@ class ReductionBot:
             imgExtension = img.split(".")[-1].replace("\n", "")
             hdu = fits.open(img.replace('\n', ''))
 
+            headerInHDU0 = True
+
             try:
                 hd = hdu[0].header
                 hd['HIERARCH T80S DET EXPTIME']
             except:
-                hd = hdu[1].header
-                self.logger.warning("Image with header inverted: {}".format(img),
-                                    extra=self._extra)
-            '''
+                headerInHDU0 = False
+                self.logger.error("Header not in HDU 0 : {}".format(img),
+                                  extra=self._extra)
 
-            if(imgExtension == "fz"):
-                hd = hdu[1].header
-                self.logger.warning("Image with header inverted: {}".format(img),
-                                    extra=self._extra)
-            else:
-                hd = hdu[0].header
-            '''
+            if(headerInHDU0 is True):
 
-            if(hd['HIERARCH T80S DET EXPTIME'] <= 5.0):
-                self.observationList['ultraShort'].append(img)
-            else:
-                if("OBJECT" in hd.keys()):
-                    self.observationList['mainSurvey'].append(img)
-                    tileName = "{0}_{1}".format(hd['OBJECT'].replace(" ", "_"),
-                                                tileEndName)
-                    if(tileName not in self.tiles
-                       ):
-
-                        self.tiles.append(tileName)
-
-                        baseInfo += "{0} {1} {2} 1 0.550 11000 \n".format(
-                            tileName,
-                            hd['CRVAL1'],
-                            hd['CRVAL2'])
-
+                if(hd['HIERARCH T80S DET EXPTIME'] <= 5.0):
+                    self.observationList['ultraShort'].append(img)
                 else:
-                    self.logger.warning(
-                        "No OBJECT key found in the header of image {}".format(
-                            img),
-                        extra=self._extra
-                    )
+                    if("OBJECT" in hd.keys()):
+                        self.observationList['mainSurvey'].append(img)
+                        tileName = "{0}_{1}".format(hd['OBJECT'].replace(" ", "_"),
+                                                    tileEndName)
+                        if(tileName not in self.tiles
+                           ):
+
+                            self.tiles.append(tileName)
+
+                            baseInfo += "{0} {1} {2} 1 0.550 11000 \n".format(
+                                tileName,
+                                hd['CRVAL1'],
+                                hd['CRVAL2'])
+
+                    else:
+                        self.logger.warning(
+                            "No OBJECT key found in the header of image {}".format(
+                                img),
+                            extra=self._extra
+                        )
 
         if(len(self.observationList['mainSurvey']) == 0):
             self.logger.warning("No Survey Data Found", extra=self._extra)
@@ -238,21 +238,22 @@ class ReductionBot:
         surveyDataFound = self.__separeteObsData(surveyData)
         return surveyDataFound
 
-    def __addDataToDB(self):
+    def __addDataToDB(self, dataListFile):
 
         # Observation: The paralelization process was implemented using the
         # Linux xarg. System Dependent.
 
         self.logger.info("Adding data into DB.", extra=self._extra)
 
-        commonCommand = "cat {0}|xargs -I ARG -P {1}".format(self.dataListFile,
+        commonCommand = "cat {0}|xargs -I ARG -P {1}".format(dataListFile,
                                                              self.nWorkers)
 
         self.logger.info("Step 1: Updating Header.", extra=self._extra)
 
-        upHead = "{0} bash -c 'updatehead.py -i {1} -o \"$1\" >> {2}' fnord ARG".format(commonCommand,
-                                                                                        self.t80cam,
-                                                                                        self.workDir + self.insertDBLogFile)
+        upHead = "{0} bash -c 'updatehead.py -i {1} -o \"$1\" >> {2}' fnord ARG".format(
+            commonCommand,
+            self.t80cam,
+            self.workDir + self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(upHead),
                          extra=self._extra)
@@ -266,8 +267,9 @@ class ReductionBot:
 
         self.logger.info("Step 2: Classifing images.", extra=self._extra)
 
-        imgClass = "{0} bash -c 'imgclassify.py -o \"$1\" >> {1}' fnord ARG ".format(commonCommand,
-                                                                                     self.workDir + self.insertDBLogFile)
+        imgClass = "{0} bash -c 'imgclassify.py -o \"$1\" >> {1}' fnord ARG ".format(
+            commonCommand,
+            self.workDir + self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(imgClass),
                          extra=self._extra)
@@ -281,8 +283,9 @@ class ReductionBot:
 
         self.logger.info("Step 3: Inserting into DB.", extra=self._extra)
 
-        inDb = "{0} bash -c 'insertdb.py -o \"$1\" >> {1}' fnord ARG".format(commonCommand,
-                                                                             self.workDir + self.insertDBLogFile)
+        inDb = "{0} bash -c 'insertdb.py -o \"$1\" >> {1}' fnord ARG".format(
+            commonCommand,
+            self.workDir + self.insertDBLogFile)
 
         self.logger.info("Appling the command: {}".format(inDb),
                          extra=self._extra)
@@ -298,9 +301,10 @@ class ReductionBot:
             "Step 4: Inserting Tile Info into DB.", extra=self._extra)
 
         try:
-            check_call("inserttiles.py {0} >> {1}".format(self.workDir + self.outTileInfo,
-                                                          self.workDir + self.insertDBLogFile),
-                       shell=True)
+            check_call("inserttiles.py {0} >> {1}".format(
+                self.workDir + self.outTileInfo,
+                self.workDir + self.insertDBLogFile),
+                shell=True)
         except:
             self.logger.error("An Error occurred inserting tiles info",
                               extra=self._extra)
@@ -308,12 +312,34 @@ class ReductionBot:
 
         return True
 
-    def __startReduction(self):
+    def hasAllFlats(self):
+        """
+        Determine the start day for the reduction
+        From the minimum Flat necessary.
+        """
+        endDate = datetime.now().date()
+        startDate = datetime.now() - timedelta(hours=self.deltaDaysFlatBias * 24)
+        startDate = start.date()
+
+        NFilt = {}
+        needMoreFlat = []
+
+        for filt in FILTERS:
+            NFilt[filt] = searchImages(startDate, endDate, frametype, filt)
+            if(NFilt[filt] < MIN_COMBINE_NUMBER_FLAT):
+                self.logger.warning(
+                    "Need More Flat for Filt {0}.".format(filt),
+                    extra=self._extra)
+                needMoreFlat.append(filt)
+
+        if(len(needMoreFlat) == 0):
+            return True, startDate.strftime("%Y-%m-%d")
+        else:
+            return False, [NFilt, needMoreFlat]
+
+    def __startReduction(self, startReduction):
         self.logger.info("Starting the reduction process", extra=self._extra)
         endReduction = datetime.now().strftime("%Y-%m-%d")
-        startReduction = datetime.now()
-        startReduction -= timedelta(hours=self.deltaDaysFlatBias * 24)
-        startReduction = startReduction.strftime("%Y-%m-%d")
 
         for tile in self.tiles:
             command = "autoJypeReductionTile.sh {0} {1} {2} {3} {4} {5}".format(
@@ -341,9 +367,15 @@ class ReductionBot:
         if(folder is not None):
             surveyDataFound = self.__selectDataByType(folder + "/")
             if(surveyDataFound is True):
-                dataInserted = self.__addDataToDB()
+                dataInserted = self.__addDataToDB(self.dataListFile)
                 if(dataInserted is True):
-                    self.__startReduction()
+                    hasFlats = self.hasAllFlats()
+                    if(hasFlats[0] == True):
+                        self.__startReduction(hasFlats[1])
+                    else:
+                        self.logger.warning(
+                            "No all necessary flats found. Starting The Flat Search.",
+                            extra=self._extra)
 
     def rescheduler(self):
         self.logger.info("Starting Scheduler", extra=self._extra)
@@ -377,44 +409,37 @@ class ReductionBot:
 
 if(__name__ == "__main__"):
     import argparse
-    description='''Autonomos Reduction Bot.
+    description = '''Autonomos Reduction Bot.
     The Bot Search for observed data in the last night and start the
     reduction process, if it found new data.
     '''
     parser = argparse.ArgumentParser(
         description=description)
 
-    parser.add_argument( "-u",
+    parser.add_argument("-u",
                         help="User Name",
                         type=str,
                         default="jype")
 
-    parser.add_argument( "-e",
+    parser.add_argument("-e",
                         help="User email",
                         type=str,
                         default="pereira.somoza@gmail.com")
 
-    parser.add_argument( "-f",
-                        help="Folder where data are reduced",
-                        type=str,
-                        default="/mnt/public/jype/MainSurvey")
-
-    parser.add_argument( "-t",
+    parser.add_argument("-t",
                         help="Time interval, in hours, for the next reduction",
                         type=int,
                         default=24)
 
-    parser.add_argument( "-d",
+    parser.add_argument("-d",
                         help="Time interval, in days, to search for Flat and Bias",
                         type=int,
                         default=15)
 
     args = parser.parse_args()
 
-
     bot = ReductionBot(user=args.u,
                        useremail=args.e,
-                       outReducFolder=args.f,
                        deltaTimeHours=args.t,
                        deltaDaysFlatBias=args.d)
     bot.startBot()
