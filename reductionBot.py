@@ -376,10 +376,46 @@ class ReductionBot:
 
 
 if(__name__ == "__main__"):
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="""Autonomos Reduction Bot.
+        The Bot Search for observed data in the last night and start the
+        reduction process, if it found new data.
+        """"
 
-    bot = ReductionBot(user="jype",
-                       useremail="pereira.somoza@gmail.com",
-                       outReducFolder='/mnt/public/jype/MainSurvey',
-                       deltaTimeHours=24,
-                       deltaDaysFlatBias=10)
+    )
+
+    parser.add_argument( "-u",
+                        help="User Name"
+                        type=str,
+                        default="jype")
+
+    parser.add_argument( "-e",
+                        help="User email"
+                        type=str,
+                        default="pereira.somoza@gmail.com")
+
+    parser.add_argument( "-f",
+                        help="Folder where data are reduced"
+                        type=str,
+                        default="/mnt/public/jype/MainSurvey")
+
+    parser.add_argument( "-t",
+                        help="Time interval, in hours, for the next reduction"
+                        type=int,
+                        default=24)
+
+    parser.add_argument( "-d",
+                        help="Time interval, in days, to search for Flat and Bias"
+                        type=int,
+                        default=10)
+
+    args = parser.parse_args()
+
+
+    bot = ReductionBot(user=args.u,
+                       useremail=args.e,
+                       outReducFolder=args.f,
+                       deltaTimeHours=args.t,
+                       deltaDaysFlatBias=args.d)
     bot.startBot()
