@@ -524,7 +524,7 @@ class ReductionBot:
 
     def __setStartTime(self, hour, minute):
         currentTime = datetime.now()
-        setTime = d.replace(hour=hour, minute=minute)
+        setTime = currentTime.replace(hour=hour, minute=minute)
         deltaTime = setTime - currentTime
         if(deltaTime.total_seconds() < 0):
             deltaTime = abs(deltaTime) + timedelta(hours=12)
