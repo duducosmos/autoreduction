@@ -377,13 +377,12 @@ class ReductionBot:
 
 if(__name__ == "__main__"):
     import argparse
+    description='''Autonomos Reduction Bot.
+    The Bot Search for observed data in the last night and start the
+    reduction process, if it found new data.
+    '''
     parser = argparse.ArgumentParser(
-        description="""Autonomos Reduction Bot.
-        The Bot Search for observed data in the last night and start the
-        reduction process, if it found new data.
-        """"
-
-    )
+        description=description)
 
     parser.add_argument( "-u",
                         help="User Name"
