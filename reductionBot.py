@@ -407,7 +407,7 @@ if(__name__ == "__main__"):
     parser.add_argument( "-d",
                         help="Time interval, in days, to search for Flat and Bias",
                         type=int,
-                        default=10)
+                        default=15)
 
     args = parser.parse_args()
 
