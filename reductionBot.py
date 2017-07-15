@@ -522,7 +522,7 @@ class ReductionBot:
                                   priority=0,
                                   action=self.rescheduler, argument=())
 
-    def __setStartTime(hour, minute):
+    def __setStartTime(self, hour, minute):
         currentTime = datetime.now()
         setTime = d.replace(hour=hour, minute=minute)
         deltaTime = setTime - currentTime
