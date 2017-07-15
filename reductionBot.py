@@ -20,7 +20,7 @@ import copy
 import logging
 from astropy.io import fits
 import glob
-from config import JYPE_VERSION, RAW_PATH_PATTERN,
+from config import JYPE_VERSION, RAW_PATH_PATTERN
 from config import FILTERS, MIN_COMBINE_NUMBER_FLAT, MIN_COMBINE_NUMBER_BIAS
 from searchImages import searchImages
 
@@ -43,7 +43,7 @@ class ReductionBot:
         self._extra = {'clientip': clientIP, 'user': user}
 
         self._searchFolder = RAW_PATH_PATTERN
-        self.outReducFolder = JYPE_JYPE_VERSION
+        self.outReducFolder = JYPE_VERSION
 
         self.t80cam = t80cam
 
@@ -522,8 +522,23 @@ class ReductionBot:
                                   priority=0,
                                   action=self.rescheduler, argument=())
 
-    def startBot(self):
-        self.rescheduler()
+    def __setStartTime(hour, minute):
+        currentTime = datetime.now()
+        setTime = d.replace(hour=hour, minute=minute)
+        deltaTime = setTime - currentTime
+        if(deltaTime.total_seconds() < 0):
+            deltaTime = abs(deltaTime) + timedelta(hours=12)
+        nextTime = currentTime + deltaTime
+        self.logger.info(
+            "The reduction will be started at: {}".format(nextTime),
+            extra=self._extra
+        )
+        self.__scheduler.enterabs(time.mktime(nextTime.timetuple()),
+                                  priority=0,
+                                  action=self.rescheduler, argument=())
+
+    def startBot(self, hour, minute):
+        self.__setStartTime(hour, minute)
         try:
             self.__scheduler.run()
         except KeyboardInterrupt:
@@ -565,4 +580,4 @@ if(__name__ == "__main__"):
                        useremail=args.e,
                        deltaTimeHours=args.t,
                        deltaDaysFlatBias=args.d)
-    bot.startBot()
+    bot.startBot(7, 0)
