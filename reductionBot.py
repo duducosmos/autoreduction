@@ -238,7 +238,7 @@ class ReductionBot:
         surveyDataFound = self.__separeteObsData(surveyData)
         return surveyDataFound
 
-    def __addDataToDB(self, dataListFile):
+    def __addDataToDB(self, dataListFile, insertTiles=True):
 
         # Observation: The paralelization process was implemented using the
         # Linux xarg. System Dependent.
@@ -297,18 +297,19 @@ class ReductionBot:
                               extra=self._extra)
             return False
 
-        self.logger.info(
-            "Step 4: Inserting Tile Info into DB.", extra=self._extra)
+        if(insertTiles is True):
+            self.logger.info(
+                "Step 4: Inserting Tile Info into DB.", extra=self._extra)
 
-        try:
-            check_call("inserttiles.py {0} >> {1}".format(
-                self.workDir + self.outTileInfo,
-                self.workDir + self.insertDBLogFile),
-                shell=True)
-        except:
-            self.logger.error("An Error occurred inserting tiles info",
-                              extra=self._extra)
-            return False
+            try:
+                check_call("inserttiles.py {0} >> {1}".format(
+                    self.workDir + self.outTileInfo,
+                    self.workDir + self.insertDBLogFile),
+                    shell=True)
+            except:
+                self.logger.error("An Error occurred inserting tiles info",
+                                  extra=self._extra)
+                return False
 
         return True
 
@@ -321,12 +322,11 @@ class ReductionBot:
         startDate = datetime.now() - timedelta(hours=self.deltaDaysFlatBias * 24)
         startDate = start.date()
 
-        NFilt = {}
         needMoreFlat = []
 
         for filt in FILTERS:
-            NFilt[filt] = searchImages(startDate, endDate, frametype, filt)
-            if(NFilt[filt] < MIN_COMBINE_NUMBER_FLAT):
+            nFilt = searchImages(startDate, endDate, "FLAS", filt)
+            if(nFilt < MIN_COMBINE_NUMBER_FLAT):
                 self.logger.warning(
                     "Need More Flat for Filt {0}.".format(filt),
                     extra=self._extra)
@@ -335,7 +335,122 @@ class ReductionBot:
         if(len(needMoreFlat) == 0):
             return True, startDate.strftime("%Y-%m-%d")
         else:
-            return False, [NFilt, needMoreFlat]
+            return False, needMoreFlat
+
+    def __searchForFlats(self, searchWindow, filts):
+        self.logger.info("Starting to search for Flat in filter {0}".format(filt),
+                         extra=self._extra)
+        flatsByDay = {datetime.strptime(swi.split("/")[-1],  "%Y%m%d").date():
+                      glob.glob(swi + "/skyflat*")
+                      for swi in searchWindow
+                      }
+        flatsByFilter = {}
+
+        for key, value in flatsByDay.items():
+
+            for img in value:
+                hdu = fits.open(img.replace('\n', ''))
+
+                headerInHDU0 = True
+
+                try:
+                    hd = hdu[0].header
+                    hd['HIERARCH T80S DET EXPTIME']
+                except:
+                    headerInHDU0 = False
+                    self.logger.error("Header not in HDU 0 : {}".format(img),
+                                      extra=self._extra)
+
+                if(headerInHDU0 is True):
+                    currentFilter = hd["FILTER"]
+                    if(currentFilter not in flatsByFilter.keys()):
+                        flatsByFilter[currentFilter] = {'date': key,
+                                                        'flats': [img]
+                                                        }
+                    else:
+                        nIFilt = len(flatsByFilter[currentFilter])
+                        if(nIFilt < MIN_COMBINE_NUMBER_FLAT):
+
+                            flatsByFilter[currentFilter]['date'] = min(
+                                flatsByFilter[currentFilter]['date'],
+                                key
+                            )
+
+                            flatsByFilter[currentFilter]['flats'].append(img)
+
+                            if(nIFilt + 1 == MIN_COMBINE_NUMBER_FLAT):
+                                self.logger.info(
+                                    "Last Flat found at {0} for {1}.".format(
+                                        key,
+                                        currentFilter),
+                                    extra=self._extra)
+
+        return flatsByFilter
+
+    def searchForFlats(self, needMoreFlat):
+
+        self.logger.info("Starting to search for Flat in previous days process",
+                         extra=self._extra)
+        self.logger.info("The search will be on the window of {0} days".format(
+            self.deltaDaysFlatBias),
+            extra=self._extra)
+
+        folder = self._searchFolder
+
+        def foldDateName(i): return datetime.now() - timedelta(days=i)
+
+        searchWindow = [foldDateName(i).strftime("%Y%m%d")
+                        for i in range(2, self.deltaDaysFlatBias + 1)
+                        ]
+
+        if(folder[-1] == "/"):
+            searchWindow = [folder + swi for swi in searchWindow
+                            if os.path.isdir(folder + swi) == True]
+        else:
+            searchWindow = [folder + "/" + swi for swi in searchWindow
+                            if os.path.isdir(folder + "/" + swi) == True]
+
+        if(len(searchWindow) == 0):
+            self.logger.error("No data folder found in the Search Window.",
+                              extra=self._extra)
+            return False
+
+        flatsFound = self.__searchForFlats(searchWindow, needMoreFlat)
+
+        if(len(flatsFound.keys()) == 0):
+            self.logger.error("No Flats found in the Search Window.",
+                              extra=self._extra)
+            return False
+
+        if(len(flatsFound.keys()) < len(needMoreFlat)):
+            self.logger.warning("No All Need Flats found in the Search Window.",
+                                extra=self._extra)
+
+        startDay, flatsInserted = self.__insertNewFlats(flatsFound)
+        return flatsInserted, startDay
+
+    def __insertNewFlats(self, flatsFound):
+
+        startDay = datetime.now().date()
+
+        if(self.workDir[-1] == "/"):
+
+            newsFlatFile = self.workDir + "newsFlat_list_{}.txt".format(
+                datetime.now().strftime("%Y%m%d")
+            )
+        else:
+            newsFlatFile = self.workDir + "/newsFlat_list_{}.txt".format(
+                datetime.now().strftime("%Y%m%d")
+            )
+
+        with open(newsFlatFile, "w") as fOut:
+            for keys, values in flatsFound.items():
+                startDay = min(values['date'], startDay)
+                for fi in values['flats']:
+                    fOut.write("{}\n".format(fi))
+
+        return startDay.strftime("%Y-%m-%d"), self.__addDataToDB(newsFlatFile, insertTiles=False)
+
 
     def __startReduction(self, startReduction):
         self.logger.info("Starting the reduction process", extra=self._extra)
@@ -376,6 +491,14 @@ class ReductionBot:
                         self.logger.warning(
                             "No all necessary flats found. Starting The Flat Search.",
                             extra=self._extra)
+                        flatsInserted, startDay = self.searchForFlats(hasFlats[1])
+                        if(flatsInserted == False):
+                            self.logger.error(
+                                "No flats found. Starting The Flat Search.",
+                                extra=self._extra)
+                        else:
+                            self.__startReduction(startDay)
+
 
     def rescheduler(self):
         self.logger.info("Starting Scheduler", extra=self._extra)
@@ -434,7 +557,7 @@ if(__name__ == "__main__"):
     parser.add_argument("-d",
                         help="Time interval, in days, to search for Flat and Bias",
                         type=int,
-                        default=15)
+                        default=20)
 
     args = parser.parse_args()
 
