@@ -527,8 +527,10 @@ class ReductionBot:
         setTime = currentTime.replace(hour=hour, minute=minute)
         deltaTime = setTime - currentTime
         if(deltaTime.total_seconds() < 0):
-            deltaTime = abs(deltaTime) + timedelta(hours=12)
-        nextTime = currentTime + deltaTime
+            nextTime = currentTime + timedelta(hours=12)
+            nextTime = nextTime.replace(hour=hour, minute=minute)
+        else:
+            nextTime = setTime
         self.logger.info(
             "The reduction will be started at: {}".format(nextTime),
             extra=self._extra
