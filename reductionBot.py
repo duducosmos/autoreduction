@@ -26,6 +26,9 @@ from searchImages import searchImages
 
 
 class ReductionBot:
+    '''
+    Reduction Bot Version 0.1
+    '''
 
     def __init__(self, user, useremail,
                  clientIP="0.0.0.0",
@@ -34,7 +37,7 @@ class ReductionBot:
                  t80cam="./t80cam.yaml",
                  instConfig="./instr-t80cam.txt",
                  deltaDaysFlatBias=10
-                 ):
+                ):
 
         self.__scheduler = sched.scheduler(timefunc=time.time,
                                            delayfunc=time.sleep)
@@ -199,6 +202,8 @@ class ReductionBot:
         self.logger.info("Selecting data by Type", extra=self._extra)
         observedData = glob.glob(folder + "*.fits") + \
             glob.glob(folder + "*.fz")
+
+        surveyDataFound = False
         surveyData = []
         for img in observedData:
             imgName = img.split("/")[-1]
@@ -217,9 +222,8 @@ class ReductionBot:
 
         if(len(surveyData) == 0):
             self.logger.warning("No Survey Data Found", extra=self._extra)
-            return False
-
-        self.__separeteObsData(surveyData)
+        else:
+            surveyDataFound = self.__separeteObsData(surveyData)
 
         self.dataListFile = self.workDir + "reduction_list_{}.txt".format(
             datetime.now().strftime("%Y%m%d")
@@ -235,7 +239,7 @@ class ReductionBot:
             for iData in self.flatList:
                 fOut.write("{}\n".format(iData))
 
-        surveyDataFound = self.__separeteObsData(surveyData)
+
         return surveyDataFound
 
     def __addDataToDB(self, dataListFile, insertTiles=True):
@@ -477,27 +481,37 @@ class ReductionBot:
                         tile),
                     extra=self._extra)
 
+    def __subStep1(self):
+        dataInserted = self.__addDataToDB(self.dataListFile)
+        if(dataInserted is True):
+            hasFlats = self.hasAllFlats()
+            if(hasFlats[0] == True):
+                self.__startReduction(hasFlats[1])
+            else:
+                self.logger.warning(
+                    "No all necessary flats found. Starting The Flat Search.",
+                    extra=self._extra)
+                flatsInserted, startDay = self.searchForFlats(hasFlats[1])
+                if(flatsInserted == False):
+                    self.logger.error(
+                        "No flats found.",
+                        extra=self._extra)
+                else:
+                    self.__startReduction(startDay)
+
+
     def steps(self):
         folder = self.searchForNewData()
         if(folder is not None):
             surveyDataFound = self.__selectDataByType(folder + "/")
             if(surveyDataFound is True):
-                dataInserted = self.__addDataToDB(self.dataListFile)
-                if(dataInserted is True):
-                    hasFlats = self.hasAllFlats()
-                    if(hasFlats[0] == True):
-                        self.__startReduction(hasFlats[1])
-                    else:
-                        self.logger.warning(
-                            "No all necessary flats found. Starting The Flat Search.",
-                            extra=self._extra)
-                        flatsInserted, startDay = self.searchForFlats(hasFlats[1])
-                        if(flatsInserted == False):
-                            self.logger.error(
-                                "No flats found. Starting The Flat Search.",
-                                extra=self._extra)
-                        else:
-                            self.__startReduction(startDay)
+                self.__subStep1()
+            else:
+                if(len(self.biasList) != 0 or len(self.flatList) != 0):
+                    dataInserted = self.__addDataToDB(self.dataListFile,
+                                                      insertTiles=False)
+
+
 
 
     def rescheduler(self):
