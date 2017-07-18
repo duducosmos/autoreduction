@@ -25,8 +25,8 @@ PATH_ROOT = "/home/ed"
 TILES_VERSION = "T01"
 RAW_PATH_PATTERN = "/mnt/images"
 dbname = "main_survey"
-dbuserName = "jypesql"
-passdb = "jypesql"
+dbuserName = ""
+passdb = ""
 
 MIN_COMBINE_NUMBER_FLAT = 3
 MIN_COMBINE_NUMBER_BIAS = 3

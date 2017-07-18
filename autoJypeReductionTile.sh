@@ -70,7 +70,7 @@ vcf=0
 
 function parallelMasterFlat(){
     # Warning: The pipelie has a large space complexity,
-    # max recomeded three filters.
+    # max recomeded four filters.
     local filters=($1 $2 $3 $4)
     for filt in "${filters[@]}";
     do
