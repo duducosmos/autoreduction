@@ -3,7 +3,6 @@
 """
 Search for images in the Pipeline Data Base.
 """
-from datetime import datetime, timedelta
 from model import db
 
 __AUTHOR = "E. S. Pereira"
