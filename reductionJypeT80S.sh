@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script with the recipie of reduction process.
+# Script with the recipie of reduction process using jype pipeline.
 # Created by Eduardo S. Pereira
 # pereira.somoza@gmail.com
 
@@ -64,13 +64,12 @@ dd1=$dd
 #Number of parallel process to reduce individual images
 nprR=3
 
-
 ei=e
 vcf=0
 
 function parallelMasterFlat(){
     # Warning: The pipelie has a large space complexity,
-    # max recomeded four filters.
+    # max recomeded three filters.
     local filters=($1 $2 $3 $4)
     for filt in "${filters[@]}";
     do
@@ -116,8 +115,8 @@ do
     echo "Starting the reduction of individual images"
     echo "for filter $filt and field $tile."
     validateCF.py j02-FLAS-b$yyyy0$mm0$dd0$ei$mm1$dd1-$filt-00-$cName $vcf
-    jgetlist.py -t SCIE -f $filt --addcond "Object like '%$tile%'" |xargs -I ARG -P $nprR runcosmet.py -o -u ARG
-    jgetlist.py -t SCIE -f $filt --addcond "Object like '%$tile%'" |xargs -I ARG -P $nprR runcosmet.py  ARG
+    jgetlist.py -t SCIE -f $filt --addcond "Object like '%${tile:0:3}%'" -s $sDate -e $eDate |xargs -I ARG -P $nprR runcosmet.py -o -u ARG
+    jgetlist.py -t SCIE -f $filt --addcond "Object like '%${tile:0:3}%'" -s $sDate -e $eDate |xargs -I ARG -P $nprR runcosmet.py  ARG
     echo ''
     echo ''
 done

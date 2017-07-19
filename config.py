@@ -18,20 +18,22 @@ UpdateTile             :  12
 Complete               :  0
 """
 
-coaddingError = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+DB_NAME = "main_survey"
+DB_USER_NAME = ""
+DB_PASSWORD = ""
+DB_ADDRESS = "127.0.0.1"
+
+COADING_ERROR = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
 JYPE_VERSION = "MainSurvey"
 PATH_ROOT = "/home/ed"
 TILES_VERSION = "T01"
 RAW_PATH_PATTERN = "/mnt/images"
-dbname = "main_survey"
-dbuserName = ""
-passdb = ""
+INSTRUMENT_CONFIG_FILE = "./instr-t80cam.txt"
 
 MIN_COMBINE_NUMBER_FLAT = 3
 MIN_COMBINE_NUMBER_BIAS = 3
 
 FILTERS = ('R', 'I', 'G', 'F660', 'U', 'Z',
            'F378', 'F395', 'F410', 'F861',
-           'F515', 'F430'
-           )
+           'F515', 'F430')
