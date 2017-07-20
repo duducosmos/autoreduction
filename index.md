@@ -4,7 +4,7 @@ The autonomous reduction bot was written in python and shell script.
 The program use the jype pipeline to reduce the data. The core of the robot is the script called `reductionJypeT80S.sh`.
 In the `reductionJypeT80S.sh` script is organized all reduction process, from the creation of master frames until the images combinations.
 
-## The `reductionJypeT80S.sh`
+## The Reduction Script
 
 The `reductionJypeT80S.sh` is optimized to generate the master flats in parallel in groups of four filters. This parallelization was optimized for a multi-core machine, and, it can be used independently of the reduction bot. This script represent the automation of the reduction process using jype pipeline.
 
