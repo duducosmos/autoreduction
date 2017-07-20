@@ -65,3 +65,11 @@ def count_images(start_date, end_date, frametype, filt=None):
         else:
             raise NameError("No Filter Passed")
     return nimages
+
+if __name__ == "__main__":
+    from datetime import datetime
+
+    search_day = datetime.now()
+    search_day = search_day.replace(day=28, month=5, year=2017).date()
+
+    print(search_images(search_day, search_day, 'SCIE', 'F660'))

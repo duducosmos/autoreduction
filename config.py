@@ -18,9 +18,9 @@ UpdateTile             :  12
 Complete               :  0
 """
 
-DB_NAME = "main_survey"
-DB_USER_NAME = ""
-DB_PASSWORD = ""
+DB_NAME = "NGC5128"
+DB_USER_NAME = "jypesql"
+DB_PASSWORD = "jypesql"
 DB_ADDRESS = "127.0.0.1"
 
 COADING_ERROR = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
