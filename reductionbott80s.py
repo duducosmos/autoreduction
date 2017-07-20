@@ -28,6 +28,14 @@ __EMAIL = "pereira.somoza@gmail.com"
 class ReductionBotT80S(object):
     """
     Reductio Bot: Used to administrate the autonomous reduction process.
+    Attr:
+        user: A name of user or a alternative name for bot
+        useremail: e-mail address that the bot will send info about the reduction process
+    Optional Attr:
+        client_ip: IP of the machine that the bot is running
+        delta_time_hours: Time range between reductions
+        work_dir: The location where the bot will save temp data and log files
+        delta_days_fb: Time range to search for bias and flat field
     """
 
     def __init__(self,
@@ -283,12 +291,15 @@ class ReductionBotT80S(object):
     def run(self, hours, minutes):
         """
         Start the scheduler to run the reduction in autonomous mode.
+        input:
+            hours: the hour of firts reduction start
+            minutes: the minutes of firts reduction start
         """
         self._set_time(hours, minutes)
         try:
             self._scheduler.run()
         except KeyboardInterrupt:
-            print("Stopping")
+            self._logger.info("Stopping the Bot.", extra=self._extra)
 
 
 if __name__ == "__main__":
