@@ -27,6 +27,17 @@ function splitDate(){
     dd=${a[2]}
 }
 
+function sendmail(){
+    msg=$1
+    if [ $mailTo != '' ]; then
+        export REPLYTO=jype@jype.com
+        now=$(date +"%T")
+        echo "The reducion process for $tile was finished at $now. $msg" | \
+        mail -a From:jype@jype.com -s "noReply:Reduction for $tile finished" $mailTo
+    fi
+
+}
+
 echo "Automatic reduction process"
 echo "for T80s project, using jype."
 echo ""
@@ -94,8 +105,14 @@ jsubmitsql.py "update t80cftab set is_valid=1 where is_valid=0"
 echo ""
 echo "Creating and validating the Master Bias"
 echo "Starting..."
+{
+    runcf.py  -s $sDate -e $eDate -t 4 --instconfig $inst
+} || {
+    sendmail "Bias Not Generated"
+    exit 1
 
-runcf.py  -s $sDate -e $eDate -t 4 --instconfig $inst
+}
+
 validateCF.py j02-BIAS-b$yyyy0$mm0$dd0$ei$mm1$dd1-00-$cName $vcf
 
 echo ""
@@ -137,11 +154,6 @@ done
 wait
 
 
-if [ $mailTo != '' ]; then
-    export REPLYTO=jype@jype.com
-    now=$(date +"%T")
-    echo "The reducion process for $tile was finished at $now." | \
-    mail -a From:jype@jype.com -s "noReply:Reduction for $tile finished" $mailTo
-fi
+sendmail
 
 echo "Reduction finished..."
