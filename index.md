@@ -38,3 +38,26 @@ nohup bash reductionJypeT80S.sh 2016-09-08 2016-09-11 instr-t80cam.txt STRIPE82_
 
 Note that here was used `&>` to redirect the `nohup` output to file `nohup_0021.out`, and the `&` was
 used to indicate that the process must be executed in background. With the `nohup` command we avoid that the process terminate is the terminal, or the connection, is closed.
+
+## The reduction Bot
+
+The autonomous reduction mode is performed by `reductionbot80s.py`.
+The program create a folder in the work directory to process some data and save the log files.
+
+The `reductionbot80s.py` receive six parameter.
+
+1. -u: The name of the current user
+2. -e: The user e-mail
+3. -t: Time interval, in hours, for the next reduction
+4. -d: Time interval, in days, to search for Flat and Bias
+5. -s: The hour that the bot start the reduction
+6. -m: The minutes that the bot start the reduction
+
+
+Also, it is recommended to run the bot as a background process:
+
+```bash
+nohup python reductionbott80s.py -u jype -e user.email@gmail.com -t 24 -d 20 -s 7 -m 0 &> nohup_bot&
+```
+
+The log files of bot is in the folder `reductionBotWDir/botLoggin`, in the current directory where the bot is running.
