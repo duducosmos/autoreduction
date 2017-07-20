@@ -320,10 +320,20 @@ if __name__ == "__main__":
                         type=int,
                         default=20)
 
+    PARSER.add_argument("-s",
+                        help="The hour that the bot start the reduction",
+                        type=int,
+                        default=7)
+
+    PARSER.add_argument("-m",
+                        help="The minutes that the bot start the reduction",
+                        type=int,
+                        default=0)
+
     ARGS = PARSER.parse_args()
 
     bot = ReductionBotT80S(user=ARGS.u,
                            useremail=ARGS.e,
                            delta_time_hours=ARGS.t,
                            delta_days_fb=ARGS.d)
-    bot.run(7, 0)
+    bot.run(ARGS.s, ARGS.m)

@@ -11,7 +11,7 @@ if [ $1 == '-h' ]; then
     echo ""
     echo ""
     echo "ex:"
-    echo "autoJypeReductionTile.sh 2016-09-08 2016-09-11 instr-t80cam.txt STRIPE82_0021 STRIPE82 pereira.somoza@gmail.com"
+    echo "reductionJypeT80S.sh 2016-09-08 2016-09-11 instr-t80cam.txt STRIPE82_0021 STRIPE82 pereira.somoza@gmail.com"
     echo ""
     exit
 fi
