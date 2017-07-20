@@ -144,11 +144,9 @@ class ReductionBotT80S(object):
         tiles = []
 
         for filt in FILTERS:
-            e_date = datetime.now()
-            e_date = e_date.date()
-            s_date = datetime.now() - timedelta(days=5)
+            s_date = datetime.now() - timedelta(days=1)
             s_date = s_date.date()
-            imgs = search_images(s_date, e_date, "SCIE", filt=filt)
+            imgs = search_images(s_date, s_date, "SCIE", filt=filt)
             for img in imgs:
                 imgf = None
 
