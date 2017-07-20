@@ -105,12 +105,12 @@ class ReductionBotT80S(object):
         for filt in FILTERS:
             nflats = count_images(start_date, end_date, "FLAS", filt)
             if nflats < MIN_COMBINE_NUMBER_FLAT:
-                info = "Need More Flat for Filt {0}.".format(filt)
+                info = "Need More Flat for Filt {0}.  Found {1}.".format(filt, nflats)
                 self._logger.error(info, extra=self._extra)
                 need_more_flats.append(filt)
 
         if len(need_more_flats) == 0:
-            return True, start_date.strftime("%Y-%m-%d")
+            return True
         else:
             return False, need_more_flats
 
@@ -144,8 +144,11 @@ class ReductionBotT80S(object):
         tiles = []
 
         for filt in FILTERS:
-            imgs = search_images(
-                datetime.now() - timedelta(day=1), "SCIE", filt=filt)
+            e_date = datetime.now()
+            e_date = e_date.date()
+            s_date = datetime.now() - timedelta(days=5)
+            s_date = s_date.date()
+            imgs = search_images(s_date, e_date, "SCIE", filt=filt)
             for img in imgs:
                 imgf = None
 
@@ -209,6 +212,7 @@ class ReductionBotT80S(object):
                                    extra=self._extra)
                 return False
             return tiles
+        return False
 
     def _start_reduction(self):
         self._logger.info("Starting the reduction process", extra=self._extra)
@@ -241,7 +245,7 @@ class ReductionBotT80S(object):
         self._next_reduction = datetime.now() + timedelta(hours=self._delta_time_hours)
 
         if self.has_all_bias() is True:
-            if self.has_all_flats is True:
+            if self.has_all_flats() is True:
                 self._start_reduction()
 
         info = "Next reduction will be started at: {}".format(
@@ -268,6 +272,10 @@ class ReductionBotT80S(object):
             next_time = set_time
 
         self._next_reduction = next_time
+        info = "Next reduction will be started at: {}".format(
+            self._next_reduction)
+
+        self._logger.info(info, extra=self._extra)
 
         self._scheduler.enterabs(time.mktime(next_time.timetuple()),
                                  priority=0,
@@ -279,6 +287,10 @@ class ReductionBotT80S(object):
         Start the scheduler to run the reduction in autonomous mode.
         """
         self._set_time(hours, minutes)
+        try:
+            self._scheduler.run()
+        except KeyboardInterrupt:
+            print("Stopping")
 
 
 if __name__ == "__main__":

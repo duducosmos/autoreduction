@@ -10,7 +10,7 @@ __DATE = "15/06/2017"
 __EMAIL = "pereira.somoza@gmail.com"
 
 
-def search_images(date, frametype, filt=None):
+def search_images(start_date, end_date, frametype, filt=None):
     """
     Return the available images in a given day.
     """
@@ -20,7 +20,9 @@ def search_images(date, frametype, filt=None):
     if frametype == "BIAS":
         nimages = db((db.t80oa.ImageType_ID == type_id)
                      &
-                     (db.t80oa.Date == date)).select(db.t80oa.Name)
+                     (db.t80oa.Date >= start_date)
+                     &
+                     (db.t80oa.Date <= end_date)).select(db.t80oa.Name)
         nimages = [img.Name for img in nimages]
     else:
         if filt != None:
@@ -29,7 +31,9 @@ def search_images(date, frametype, filt=None):
                          &
                          (db.t80oa.Filter_ID == filter_id)
                          &
-                         (db.t80oa.Date == date)).select(db.t80oa.Name)
+                         (db.t80oa.Date >= start_date)
+                         &
+                         (db.t80oa.Date <= end_date)).select(db.t80oa.Name)
             nimages = [img.Name for img in nimages]
         else:
             raise NameError("No Filter Passed")
