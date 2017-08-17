@@ -107,7 +107,7 @@ Also verify if all the filters was correctly insert into the table filter.
 The next step  it is the inserting of the tile info in the database.
 In this case, create a txt (e.g, tiles.txt) file with the following informations:
 
-'''
+```
 # 1 PNAME
 # 2 RA
 # 3 DEC
@@ -115,7 +115,7 @@ In this case, create a txt (e.g, tiles.txt) file with the following informations
 # 5 PIXEL_SCALE
 # 6 IMAGE_SIZE
 STRIPE82_0099  308.97671 -0.69992 1 0.550 10000
-'''
+```
 
 The last line has the name of the tile, that will be used to combine the images.
 
