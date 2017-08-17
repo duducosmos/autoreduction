@@ -93,7 +93,9 @@ quit;
 
 It is necessary complete some informations in the database, in this case, open a web browser and type
 
-<http://192.168.20.101/phpmyadmin/>
+<http://machine_IP/phpmyadmin/>
+
+where `machine_IP` is the IP of the virtual machine that are running the pipeline.
 
 The  user and password are the same used in mysql terminal mode.
 
